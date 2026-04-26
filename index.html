@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+</head>
+<body class="bg-[#f8faf9] pb-32">
+    <main class="px-6 pt-8 max-w-2xl mx-auto">
+        <header class="mb-10 flex justify-between items-start">
+            <div>
+                <p class="text-[#006c55] font-bold uppercase tracking-widest text-xs">Smart Timetable</p>
+                <h2 class="text-4xl font-extrabold" id="greeting">Hello!</h2>
+                <span id="roleBadge" class="mt-2 inline-block px-3 py-1 bg-green-100 text-[#006c55] text-[10px] font-bold rounded-full uppercase tracking-tighter"></span>
+            </div>
+            <button onclick="Storage.logout()" class="text-red-500 font-bold text-sm">Logout</button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Timetable (Everyone) -->
+            <div onclick="window.location.href='timetable.html'" class="p-8 bg-white rounded-[2rem] shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-[#006c55]/10 text-[#006c55] rounded-2xl flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                </div>
+                <h3 class="text-xl font-bold">View Schedule</h3>
+                <p class="text-gray-500 text-sm mt-1">Check today's classes.</p>
+            </div>
+
+        
+          <!-- Manage Timetable (NOW VISIBLE TO ALL TEACHERS) -->
+<div id="teacherCard" onclick="window.location.href='setup.html'" class="p-8 bg-white rounded-[2rem] shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow">
+    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined">edit_calendar</span>
+    </div>
+    <h3 class="text-xl font-bold">Manage Timetable</h3>
+    <p class="text-gray-500 text-sm mt-1">Add or edit subjects.</p>
+</div>
+
+            <!-- Daily Routine (Everyone) -->
+            <div onclick="window.location.href='routine.html'" class="p-8 bg-white rounded-[2rem] shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined">checklist</span>
+                </div>
+                <h3 class="text-xl font-bold">Daily Tasks</h3>
+                <p class="text-gray-500 text-sm mt-1">Manage your personal routine.</p>
+            </div>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 backdrop-blur-xl border-t z-50">
+        <a href="index.html" class="flex flex-col items-center text-[#006c55]"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-bold">HOME</span></a>
+        <a href="timetable.html" class="flex flex-col items-center text-gray-400"><span class="material-symbols-outlined">calendar_view_month</span><span class="text-[10px] font-bold">TIMETABLE</span></a>
+        <a href="routine.html" class="flex flex-col items-center text-gray-400"><span class="material-symbols-outlined">event_note</span><span class="text-[10px] font-bold">ROUTINE</span></a>
+    </nav>
+
+    <script src="storage.js"></script>
+    <script>
+      const user = Storage.getCurrentUser();
+if (!user) {
+    window.location.href = 'login.html';
+} else {
+    document.getElementById('greeting').textContent = `Hello, ${user.name}!`;
+    // No need to check for role anymore as everyone is a teacher
+    document.getElementById('roleBadge').textContent = "Teacher / Administrator";
+}
+    </script>
+    <script src="storage.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>

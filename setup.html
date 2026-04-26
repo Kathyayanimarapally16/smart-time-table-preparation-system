@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/><title>Setup - Smart Timetable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+</head>
+<body class="bg-slate-50 pb-20">
+    <nav class="bg-white p-4 shadow-sm flex justify-between items-center sticky top-0 z-50">
+        <button onclick="window.location.href='index.html'" class="flex items-center gap-2 font-bold bg-slate-800 text-white px-4 py-2 rounded-xl">
+            <span class="material-symbols-outlined">home</span> HOME
+        </button>
+        <h1 class="font-black text-xl text-emerald-600">TIMETABLE SETUP</h1>
+        <button onclick="generate()" class="bg-emerald-500 text-white px-8 py-2 rounded-xl font-bold">GENERATE ALL</button>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-4 mt-8 space-y-6">
+        <!-- Inside the Header Editor div in setup.html -->
+<div class="bg-white p-6 rounded-3xl shadow-sm border grid grid-cols-1 md:grid-cols-3 gap-4">
+    <input id="hDept" placeholder="Department (e.g. CSE - Data Science)" class="p-3 bg-slate-50 rounded-xl border">
+    <input id="hAcad" placeholder="Academic Year (e.g. 2025-26)" class="p-3 bg-slate-50 rounded-xl border">
+    <input id="hYearSem" placeholder="Year & Sem (e.g. II B.Tech II Sem)" class="p-3 bg-slate-50 rounded-xl border">
+    <input id="hCoord" placeholder="Academic Coordinator" class="p-3 bg-slate-50 rounded-xl border">
+    <input id="hIncharge" placeholder="Class In-Charge" class="p-3 bg-slate-50 rounded-xl border">
+    <input id="hRoom" placeholder="Room No." class="p-3 bg-slate-50 rounded-xl border">
+    <input id="hDate" placeholder="w.e.f. (Date)" class="p-3 bg-slate-50 rounded-xl border">
+    <input id="hSignCoord" placeholder="Co-ordinator Name (for Sign)" class="p-3 bg-slate-50 rounded-xl border">
+    <input id="hSignHOD" placeholder="HOD Name (for Sign)" class="p-3 bg-slate-50 rounded-xl border">
+    <button onclick="saveHeader()" class="col-span-full bg-emerald-600 text-white font-bold py-3 rounded-xl">Save Template Details</button>
+</div>
+
+<script>
+// Update the saveHeader function in setup.html
+function saveHeader() {
+    const info = {
+        dept: document.getElementById('hDept').value,
+        acadYear: document.getElementById('hAcad').value,
+        yearSem: document.getElementById('hYearSem').value,
+        coord: document.getElementById('hCoord').value,
+        incharge: document.getElementById('hIncharge').value,
+        room: document.getElementById('hRoom').value,
+        date: document.getElementById('hDate').value,
+        signCoord: document.getElementById('hSignCoord').value,
+        signHOD: document.getElementById('hSignHOD').value
+    };
+    Storage.saveHeaderInfo(info);
+    alert("Template details saved!");
+}
+</script>
+       <!-- Update this part in setup.html -->
+<div class="bg-white p-6 rounded-3xl shadow-sm flex gap-4">
+    <select id="secSelect" onchange="renderQueue()" class="flex-grow p-4 bg-slate-100 rounded-2xl font-bold outline-none border"></select>
+    <button onclick="addSec()" class="bg-black text-white px-6 rounded-2xl font-bold">+ New Section</button>
+    <!-- ADDED THIS BUTTON -->
+    <button onclick="deleteSec()" class="bg-red-500 text-white px-6 rounded-2xl font-bold">Delete Section</button>
+</div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Theory Input -->
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border-t-8 border-blue-500">
+                <h2 class="font-black text-blue-500 mb-4 uppercase">Theory & Specials</h2>
+                <div class="space-y-4">
+                    <input id="cName" placeholder="Subject Name" class="w-full p-4 bg-slate-50 rounded-2xl border">
+                    <input id="cTeacher" placeholder="Faculty Name" class="w-full p-4 bg-slate-50 rounded-2xl border">
+                    <div class="flex items-center gap-4 p-3 bg-blue-50 rounded-2xl">
+                        <input type="checkbox" id="isSpec" onchange="document.getElementById('spBox').classList.toggle('hidden', !this.checked)">
+                        <label class="text-xs font-bold">Special Class?</label>
+                        <select id="spBox" class="hidden p-2 rounded border bg-white text-xs font-bold">
+                            <option value="1">1 Period</option>
+                            <option value="2">2 Periods</option>
+                        </select>
+                    </div>
+                    <button onclick="saveSub(false)" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold">Add Subject</button>
+                </div>
+            </div>
+
+            <!-- Lab Input -->
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm border-t-8 border-orange-500">
+                <h2 class="font-black text-orange-500 mb-4 uppercase">Laboratories</h2>
+                <div class="space-y-4">
+                    <input id="lName" placeholder="Lab Name" class="w-full p-4 bg-slate-50 rounded-2xl border">
+                    <input id="lTeacher" placeholder="Faculty Name" class="w-full p-4 bg-slate-50 rounded-2xl border">
+                    <button onclick="saveSub(true)" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold">Add Lab (3 Periods)</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="queue" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6"></div>
+    </div>
+
+    <script src="storage.js"></script>
+   <script>
+    let struct = Storage.getStructure();
+    let subs = Storage.getSubjects();
+
+    // 1. Initialize Dropdown
+    function initDropdown() {
+        let dHtml = '<option value="">Select Section...</option>';
+        struct.years.forEach(y => y.branches.forEach(b => b.sections.forEach(s => {
+            let id = `${y.name} - ${b.name} - Sec ${s}`;
+            dHtml += `<option value="${id}">${id}</option>`;
+        })));
+        document.getElementById('secSelect').innerHTML = dHtml;
+    }
+
+    // 2. Add Subject logic
+    function saveSub(isLab) {
+        const sec = document.getElementById('secSelect').value;
+        const prefix = isLab ? 'l' : 'c';
+        const name = document.getElementById(prefix+'Name').value;
+        const teacher = document.getElementById(prefix+'Teacher').value;
+        
+        if(!sec) return alert("Please select a Section from the dropdown first!");
+        if(!name) return alert("Please enter a subject name!");
+
+        subs.push({ 
+            id: Date.now(), 
+            sectionId: sec, 
+            name, 
+            teacher, 
+            isLab, 
+            isSpecial: !isLab && document.getElementById('isSpec').checked,
+            specialCount: document.getElementById('spBox').value 
+        });
+
+        Storage.saveSubjects(subs); 
+        renderQueue();
+        
+        // Clear inputs
+        document.getElementById(prefix+'Name').value = '';
+        document.getElementById(prefix+'Teacher').value = '';
+    }
+
+    function renderQueue() {
+        const sec = document.getElementById('secSelect').value;
+        const filtered = subs.filter(s => s.sectionId === sec);
+        document.getElementById('queue').innerHTML = filtered.map(s => `
+            <div class="bg-white p-3 rounded-2xl border flex justify-between items-center shadow-sm">
+                <div class="text-xs font-bold">${s.name}<br><span class="text-slate-400">${s.teacher}</span></div>
+                <button onclick="removeSub(${s.id})" class="text-red-500"><span class="material-symbols-outlined">delete</span></button>
+            </div>
+        `).join('');
+    }
+
+    function removeSub(id) { 
+        subs = subs.filter(s => s.id !== id); 
+        Storage.saveSubjects(subs); 
+        renderQueue(); 
+    }
+
+    function generate() { 
+        Storage.generateTimetable(); 
+        const master = Storage.getMasterTimetable();
+        if(master.length > 0) {
+            alert("Timetable Generated Successfully!");
+            window.location.href='timetable.html'; 
+        } else {
+            alert("Failed to generate. Ensure you added sections and subjects.");
+        }
+    }
+
+    function addSec() {
+        const y = prompt("Year:"), b = prompt("Branch:"), s = prompt("Sec:");
+        if(y && b && s) {
+            let yr = struct.years.find(i=>i.name===y) || {name:y, branches:[]};
+            if(!struct.years.includes(yr)) struct.years.push(yr);
+            let br = yr.branches.find(i=>i.name===b) || {name:b, sections:[]};
+            if(!yr.branches.includes(br)) yr.branches.push(br);
+            if(!br.sections.includes(s)) br.sections.push(s);
+            Storage.saveStructure(struct); 
+            location.reload();
+        }
+    }
+
+    initDropdown();
+    function saveHeader() {
+    const info = {
+        dept: document.getElementById('hDept').value,
+        acadYear: document.getElementById('hAcad').value,
+        yearSem: document.getElementById('hYearSem').value,
+        incharge: document.getElementById('hIncharge').value,
+        date: document.getElementById('hDate').value
+    };
+    Storage.saveHeaderInfo(info);
+    alert("Header details saved!");
+}
+function deleteSec() {
+    const secId = document.getElementById('secSelect').value;
+    if (!secId) return alert("Please select a section to delete.");
+
+    if (confirm(`Are you sure you want to delete "${secId}" and all its subjects?`)) {
+        // 1. Remove from Structure
+        // Format of secId is "Year - Branch - Sec S"
+        const parts = secId.split(' - ');
+        const yName = parts[0];
+        const bName = parts[1];
+        const sName = parts[2].replace('Sec ', '');
+
+        let struct = Storage.getStructure();
+        const year = struct.years.find(y => y.name === yName);
+        if (year) {
+            const branch = year.branches.find(b => b.name === bName);
+            if (branch) {
+                branch.sections = branch.sections.filter(s => s !== sName);
+                
+                // Cleanup: if branch has no sections, remove branch
+                if (branch.sections.length === 0) {
+                    year.branches = year.branches.filter(b => b.name !== bName);
+                }
+                // Cleanup: if year has no branches, remove year
+                if (year.branches.length === 0) {
+                    struct.years = struct.years.filter(y => y.name !== yName);
+                }
+            }
+        }
+        Storage.saveStructure(struct);
+
+        // 2. Remove associated subjects
+        let subs = Storage.getSubjects();
+        subs = subs.filter(s => s.sectionId !== secId);
+        Storage.saveSubjects(subs);
+
+        // 3. Refresh
+        alert("Section deleted successfully.");
+        location.reload();
+    }
+}
+</script>
+    <script src="storage.js"></script>
+    <script src="index.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>

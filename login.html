@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login - Smart Timetable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md bg-white p-8 rounded-[2rem] shadow-lg">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Welcome Back</h2>
+        
+        <form id="logForm" class="space-y-4">
+            <input id="l-email" required type="email" placeholder="Email" class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-[#006c55]"/>
+            <input id="l-password" required type="password" placeholder="Password" class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-[#006c55]"/>
+            <button type="submit" class="w-full bg-[#006c55] text-white font-bold py-4 rounded-xl hover:bg-[#005241]">Login</button>
+        </form>
+        
+        <p class="text-center mt-6 text-sm text-gray-600">
+            Need an account? <a href="register.html" class="text-[#006c55] font-bold hover:underline">Register</a>
+        </p>
+    </div>
+
+    <script src="storage.js"></script>
+    <script>
+        document.getElementById('logForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('l-email').value.trim();
+            const pass = document.getElementById('l-password').value;
+            
+            const users = Storage.getAllUsers();
+            
+            // Debug: See who is registered in your console (Press F12)
+            console.log("Registered Users:", users);
+
+         const user = users.find(u => u.email === email && u.password === pass);
+
+if (user) {
+    Storage.setCurrentUser(user);
+    window.location.href = 'index.html';
+} else {
+    const emailExists = users.find(u => u.email === email);
+    if (!emailExists) {
+        alert("Teacher account not found. Please register.");
+    } else {
+        alert("Incorrect password.");
+    }
+}
+        });
+    </script>
+</body>
+ <script src="storage.js"></script>
+    <script src="auth.js"></script>
+</html>

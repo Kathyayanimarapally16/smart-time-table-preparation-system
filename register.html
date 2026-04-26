@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Register - Smart Timetable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md bg-white p-8 rounded-[2rem] shadow-lg">
+        <h2 class="text-2xl font-bold mb-2 text-gray-800">Create Account</h2>
+        <p class="text-gray-500 mb-6 text-sm">Join the Smart Timetable community</p>
+        
+        <form id="registerForm" class="space-y-4">
+            <!-- Full Name -->
+            <input id="r-name" required type="text" placeholder="Full Name" class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-[#006c55]"/>
+            
+            <!-- Email -->
+            <input id="r-email" required type="email" placeholder="Email Address" class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-[#006c55]"/>
+            
+
+            <!-- Password -->
+            <input id="r-password" required type="password" placeholder="Create Password" class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-[#006c55]"/>
+            
+            <button type="submit" class="w-full bg-[#006c55] text-white font-bold py-4 rounded-xl hover:bg-[#005241] transition-colors">
+                Create Account
+            </button>
+        </form>
+        
+        <p class="text-center mt-6 text-sm text-gray-600">
+            Already have an account? <a href="login.html" class="text-[#006c55] font-bold hover:underline">Login</a>
+        </p>
+    </div>
+
+    <script src="storage.js"></script>
+   <script>
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const newUser = {
+        name: document.getElementById('r-name').value,
+        email: document.getElementById('r-email').value,
+        role: 'teacher', // Every new user is now automatically a teacher
+        password: document.getElementById('r-password').value
+    };
+
+    const users = Storage.getAllUsers();
+    if (users.find(u => u.email === newUser.email)) {
+        alert("Email already exists!");
+        return;
+    }
+
+    Storage.saveUserToSystem(newUser);
+    Storage.setCurrentUser(newUser);
+    window.location.href = 'index.html';
+});
+    </script>
+    <script src="storage.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>

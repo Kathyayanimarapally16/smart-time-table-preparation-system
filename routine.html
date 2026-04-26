@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Routine - Smart Timetable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .checked-task { text-decoration: line-through; opacity: 0.5; }
+    </style>
+</head>
+<body class="bg-[#f8faf9] pb-32">
+
+    <header class="p-6 bg-white border-b flex justify-between items-center">
+        <div>
+            <h1 id="userHeader" class="text-3xl font-extrabold text-[#2d3433]">Hi, User!</h1>
+            <p class="text-[#006c55] font-bold uppercase tracking-widest text-xs">Daily Routine Manager</p>
+        </div>
+        <button onclick="window.location.href='index.html'" class="text-gray-400">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </header>
+
+    <main class="p-6 max-w-2xl mx-auto">
+        <div id="routineList" class="space-y-4">
+            <!-- Tasks will appear here -->
+        </div>
+
+        <!-- Add Button -->
+        <button onclick="addNewRoutine()" class="fixed bottom-24 right-6 w-14 h-14 bg-[#006c55] text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-50">
+            <span class="material-symbols-outlined text-3xl">add</span>
+        </button>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 backdrop-blur-xl border-t z-50">
+        <a href="index.html" class="flex flex-col items-center text-gray-400"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-bold">HOME</span></a>
+        <a href="timetable.html" class="flex flex-col items-center text-gray-400"><span class="material-symbols-outlined">calendar_view_month</span><span class="text-[10px] font-bold">TIMETABLE</span></a>
+        <a href="routine.html" class="flex flex-col items-center text-[#006c55]"><span class="material-symbols-outlined">event_note</span><span class="text-[10px] font-bold">ROUTINE</span></a>
+    </nav>
+
+    <script src="storage.js"></script>
+    <script>
+        // 1. Initial Load
+        const user = Storage.getCurrentUser();
+        if(!user) window.location.href = 'login.html';
+        
+        document.getElementById('userHeader').textContent = `Hi, ${user.name}!`;
+
+        // 2. Render Function
+        function renderRoutine() {
+            const listContainer = document.getElementById('routineList');
+            const routines = Storage.getRoutine(); // Gets specific user's routine
+
+            if (routines.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-20">
+                        <span class="material-symbols-outlined text-gray-200 text-6xl">task_alt</span>
+                        <p class="text-gray-400 mt-2">No tasks for today. Click + to add.</p>
+                    </div>`;
+                return;
+            }
+
+            // Sort by time
+            routines.sort((a, b) => a.time.localeCompare(b.time));
+
+            listContainer.innerHTML = routines.map((item, index) => `
+                <div class="flex items-center justify-between bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 mb-4">
+                    <div class="flex items-center gap-4">
+                        <input type="checkbox" ${item.completed ? 'checked' : ''} 
+                            onclick="toggleRoutine(${index})"
+                            class="w-6 h-6 rounded-lg border-2 border-[#006c55] text-[#006c55] focus:ring-0">
+                        <div>
+                            <p class="text-[10px] font-bold text-[#006c55]">${item.time}</p>
+                            <h3 class="font-bold text-lg ${item.completed ? 'checked-task text-gray-300' : 'text-gray-800'}">${item.task}</h3>
+                        </div>
+                    </div>
+                    <button onclick="deleteRoutine(${index})" class="w-10 h-10 flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // 3. Add Task
+        window.addNewRoutine = function() {
+            const task = prompt("What is the task?");
+            if (!task) return;
+            const time = prompt("What time? (HH:MM)", "08:00");
+            if (!time) return;
+
+            const routines = Storage.getRoutine();
+            routines.push({ task, time, completed: false });
+            Storage.saveRoutine(routines);
+            renderRoutine();
+        };
+
+        // 4. Toggle Completion
+        window.toggleRoutine = function(index) {
+            const routines = Storage.getRoutine();
+            routines[index].completed = !routines[index].completed;
+            Storage.saveRoutine(routines);
+            renderRoutine();
+        };
+
+        // 5. DELETE FUNCTION (FIXED)
+        window.deleteRoutine = function(index) {
+            if(confirm("Delete this task?")) {
+                const routines = Storage.getRoutine();
+                routines.splice(index, 1); // Remove 1 item at the specific index
+                Storage.saveRoutine(routines); // Save the updated list back to the user
+                renderRoutine(); // Refresh the screen
+            }
+        };
+
+        // Load on start
+        window.onload = renderRoutine;
+    </script>
+</body>
+</html>
